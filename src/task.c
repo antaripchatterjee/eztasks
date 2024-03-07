@@ -76,7 +76,7 @@ void read_task_input(task_t *task, void *input)
     }
 }
 
-void write_EZTASK_OUTPUT(task_t *task, void *output)
+void write_task_output(task_t *task, void *output)
 {
     if (task->_id && task->_outBuf.buffer && output) {
         memmove(task->_outBuf.buffer, output, task->_outBuf.size);

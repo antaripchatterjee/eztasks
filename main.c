@@ -37,7 +37,7 @@ taskstatus_t my_task_add(task_t *task)
   task->_children = create_new_group();
   mul(task->_children, input[0], input[1]);
   int output = input[0] + input[1];
-  write_EZTASK_OUTPUT(task, &output);
+  write_task_output(task, &output);
   return TS_COMPLETED;
 }
 
@@ -47,7 +47,7 @@ taskstatus_t my_task_sub(task_t *task)
   int input[2];
   read_task_input(task, input);
   int output = input[0] - input[1];
-  write_EZTASK_OUTPUT(task, &output);
+  write_task_output(task, &output);
   return TS_COMPLETED;
 }
 
