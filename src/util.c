@@ -72,16 +72,3 @@ task_t *dequeue_task(taskgroup_t *tg) {
     return next_task;
 }
 
-void extend_group(taskgroup_t *otg, taskgroup_t *etg) {
-    if (otg && etg) {
-        while (etg->_task_queue) {
-        task_t *task = dequeue_task(etg);
-            if (task) {
-                etg->_task_count--;
-                task->_id = otg->_last_task_id + 1;
-                group_task_into(otg, task);
-            }
-        }
-    }
-}
-

@@ -17,8 +17,6 @@ void        copy_taskbuf    (taskbuf_t* dest, taskbuf_t src);
 int         enqueue_task    (taskgroup_t *tg, task_t *task);
 task_t*     dequeue_task    (taskgroup_t *tg);
 
-void        extend_group    (taskgroup_t *otg, taskgroup_t *etg);
-
 
 #ifdef __cplusplus
 }

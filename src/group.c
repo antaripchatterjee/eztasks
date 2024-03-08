@@ -34,6 +34,19 @@ void clean_group(taskgroup_t *tg) {
     }
 }
 
+void extend_group(taskgroup_t *otg, taskgroup_t *etg) {
+    if (otg && etg) {
+        while (etg->_task_queue) {
+        task_t *task = dequeue_task(etg);
+            if (task) {
+                etg->_task_count--;
+                task->_id = otg->_last_task_id + 1;
+                group_task_into(otg, task);
+            }
+        }
+    }
+}
+
 taskbuflist_t await_group(taskgroup_t *tg)
 {
     if(!tg || !(tg->_task_count) || !(tg->_task_queue)) {
