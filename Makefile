@@ -10,14 +10,14 @@ AR=ar
 all: main.o eztasks
 	$(CC) $(CFLAGS) -I$(INCLUDES) $(OBJECTS)/main.o $(BUILD_D)/eztasks.a -o test 
 
-install: util.o group.o task.o
-	$(AR) -rcs $(BUILD_R)/eztasks.a $(OBJECTS)/util.o $(OBJECTS)/group.o $(OBJECTS)/task.o
+install: helper.o group.o task.o
+	$(AR) -rcs $(BUILD_R)/eztasks.a $(OBJECTS)/helper.o $(OBJECTS)/group.o $(OBJECTS)/task.o
 
-eztasks: util.o group.o task.o
-	$(AR) -rc $(BUILD_D)/eztasks.a $(OBJECTS)/util.o $(OBJECTS)/group.o $(OBJECTS)/task.o
+eztasks: helper.o group.o task.o
+	$(AR) -rc $(BUILD_D)/eztasks.a $(OBJECTS)/helper.o $(OBJECTS)/group.o $(OBJECTS)/task.o
 
-util.o: ./src/util.c
-	$(CC) $(CFLAGS) -I$(INCLUDES) -c ./src/util.c -o $(OBJECTS)/util.o
+helper.o: ./src/helper.c
+	$(CC) $(CFLAGS) -I$(INCLUDES) -c ./src/helper.c -o $(OBJECTS)/helper.o
 
 group.o: ./src/group.c
 	$(CC) $(CFLAGS) -I$(INCLUDES) -c ./src/group.c -o $(OBJECTS)/group.o
