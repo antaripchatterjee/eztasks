@@ -103,7 +103,7 @@ taskbool_t is_task_timedout(task_t* task) {
     return false;
 }
 
-void* consume_EZTASK_OUTPUT(taskbuflist_t taskBufs, taskid_t tid, void* dest) {
+void* consume_task_output(taskbuflist_t taskBufs, taskid_t tid, void* dest) {
     if(tid && tid <= taskBufs.length && taskBufs.bufList) {
         if(dest && taskBufs.bufList[tid-1].buffer) {
             memmove(dest, taskBufs.bufList[tid-1].buffer, taskBufs.bufList[tid-1].size);

@@ -22,7 +22,7 @@ void        set_task_timeout    (task_t* task, tasknum_t timeoutMs, tasktimeoufn
 taskbool_t  is_task_timedout    (task_t* task);
 void        read_task_input     (task_t *task, void *input);
 void        write_task_output   (task_t *task, void *output);
-void*       consume_EZTASK_OUTPUT (taskbuflist_t taskBufs, taskid_t tid, void* dest);
+void*       consume_task_output (taskbuflist_t taskBufs, taskid_t tid, void* dest);
 
 #ifdef __cplusplus
 }
