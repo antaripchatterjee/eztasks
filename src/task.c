@@ -69,6 +69,16 @@ taskid_t group_task_into(taskgroup_t *tg, task_t *task)
     return (taskid_t) 0;
 }
 
+taskid_t* gather_tasks(taskgroup_t* tg, taskint_t taskCount, task_t* taskList[]) {
+    if(!tg || !taskCount || !taskList) return (taskid_t*) NULL; 
+    taskid_t* tids = (taskid_t*) malloc(sizeof(taskid_t) * taskCount);
+    if(!tids) return (taskid_t*) NULL;
+    for(taskint_t i = 0; i < taskCount; i++) {
+        tids[i] = group_task_into(tg, taskList[i]);
+    }
+    return tids;
+}
+
 void read_task_input(task_t *task, void *input)
 {
     if (task->_id && task->_inBuf.buffer && input) {
