@@ -66,8 +66,6 @@ struct _taskgroup_t {
     taskqueue_t*    _task_queue;
     taskint_t       _task_count;
     taskid_t        _last_task_id;
-    taskint_t       _initiated_at;
-    tasknum_t       _timeoutMs;
 };
 
 #endif // __EZTASKS_TYPES_H__

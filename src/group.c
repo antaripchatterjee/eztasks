@@ -2,9 +2,7 @@
 #include "task.h"
 #include "group.h"
 
-#include <string.h>
 #include <stdlib.h>
-#include <time.h>
 
 taskgroup_t* create_new_group() {
     taskgroup_t* tg = (taskgroup_t*) malloc(sizeof(taskgroup_t));
@@ -17,8 +15,6 @@ void init_group(taskgroup_t *tg) {
         tg->_task_count = 0ULL;
         tg->_last_task_id = 0ULL;
         tg->_task_queue = EZT_QNIL;
-        tg->_initiated_at = (taskint_t) clock();
-        tg->_timeoutMs = EZT_NO_TIMEOUT;
     }
 }
 
@@ -108,23 +104,4 @@ taskbuflist_t await_group(taskgroup_t *tg)
         }
     }
     return task_bufs;
-}
-
-taskbool_t is_group_timedout(taskgroup_t* tg) {
-    if(!tg) return true;
-    if(tg->_timeoutMs == EZT_NO_TIMEOUT) {
-        return false;
-    }
-    tasknum_t groupElapsedTime = (((tasknum_t)((taskint_t) clock() - 
-        tg->_initiated_at))*1000)/CLOCKS_PER_SEC;
-    if(groupElapsedTime >= tg->_timeoutMs) {
-        return true;
-    }
-    return false;
-}
-
-void set_group_timeout(taskgroup_t *tg, tasknum_t timeoutMs) {
-    if(tg) {
-        tg->_timeoutMs = timeoutMs;
-    }
 }
