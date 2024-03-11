@@ -2,17 +2,17 @@
 #include <stdlib.h>
 #include <eztasks.h>
 
-
+taskbool_t cond = false;
 
 taskstatus_t my_task_mul(task_t *task) {
-  static int i;
+  taskint_t iterCount = task->_state._iter_count;
   printf("Task mul got id: %llu\n", task->_id);
   int input[2];
   read_task_input(task, input);
-  int output = input[0] * input[1];
-  printf("mul[%d]: %d\n", i, output);
-  i++;
-  return i == 100 ? TS_COMPLETED : TS_INPROGRESS;
+  int output = (int) iterCount * (input[0] * input[1]);
+  printf("mul[%llu]: %d\n", iterCount, output);
+  if(iterCount == 100) cond = true;
+  return iterCount == 100 ? TS_COMPLETED : TS_INPROGRESS;
 }
 
 
@@ -86,6 +86,7 @@ taskstatus_t task_sleep(task_t* task) {
 task_t* async_sleep(double ms) {
   task_t* task = create_new_task(NULL, 0, 0, &task_sleep);
   set_task_timeout(task, (tasknum_t) ms, EZT_NO_TIMEOUT_ACTION);
+  set_task_condition(task, &cond);
   return task;
 }
 

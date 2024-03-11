@@ -50,6 +50,7 @@ struct _task_t {
     taskint_t       _startedAt;
     tasknum_t       _timeoutMs;
     tasktimeoufn_t  _onTimeout;
+    taskbool_t*     _condition;
 };
 
 struct _taskqueue_t {

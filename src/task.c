@@ -44,6 +44,7 @@ task_t* create_new_task (void* inBufPtr,  taskint_t inBufSize, taskint_t outBufS
         new_task->_startedAt = 0UL;
         new_task->_timeoutMs = EZT_NO_TIMEOUT;
         new_task->_onTimeout = EZT_NO_TIMEOUT_ACTION;
+        new_task->_condition = EZT_NO_CONDITION;
     }
     return new_task;
 }
@@ -95,8 +96,15 @@ void set_task_timeout(task_t* task, tasknum_t timeoutMs, tasktimeoufn_t onTimeou
     }
 }
 
+void set_task_condition(task_t* task, taskbool_t* condition) {
+    if(task) {
+        task->_condition = condition;
+    }
+}
+
 taskbool_t is_task_timedout(task_t* task) {
-    if(!task) return true; 
+    if(!task) return true;
+    if(task->_condition && *(task->_condition)) return true; 
     if(task->_timeoutMs == EZT_NO_TIMEOUT) {
         return false;
     }
