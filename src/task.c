@@ -22,12 +22,7 @@ void free_task (task_t* task) {
     }
 }
 
-task_t* create_new_task (
-    void* inBufPtr, 
-    taskint_t inBufSize, 
-    taskint_t outBufSize, 
-    taskfn_t taskFn
-) {
+task_t* create_new_task (void* inBufPtr,  taskint_t inBufSize, taskint_t outBufSize, taskfn_t taskFn) {
     task_t *new_task = (task_t *)malloc(sizeof(task_t));
     if (new_task)
     {
@@ -111,16 +106,4 @@ taskbool_t is_task_timedout(task_t* task) {
         return true;
     }
     return false;
-}
-
-void* consume_task_output(taskbuflist_t taskBufs, taskid_t tid, void* dest) {
-    if(tid && tid <= taskBufs.length && taskBufs.bufList) {
-        if(dest && taskBufs.bufList[tid-1].buffer) {
-            memmove(dest, taskBufs.bufList[tid-1].buffer, taskBufs.bufList[tid-1].size);
-            free(taskBufs.bufList[tid-1].buffer);
-            taskBufs.bufList[tid-1] = empty_taskbuf();
-            return dest;
-        }
-    }
-    return NULL;
 }

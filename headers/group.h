@@ -11,7 +11,7 @@ extern "C"
 taskgroup_t*    create_new_group    (void);
 void            init_group          (taskgroup_t *tg);
 void            clean_group         (taskgroup_t *tg);
-taskbuflist_t   await_group         (taskgroup_t *tg);
+const taskint_t await_group         (taskgroup_t *tg);
 void            extend_group        (taskgroup_t *otg, taskgroup_t *etg);
 
 

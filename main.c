@@ -107,11 +107,13 @@ int main(int argc, char const *argv[])
   if(!add_id) perror("Could not group task 'add'");
   if(!sub_id) perror("Could not group task 'sub'");
   if(!sleep_id) perror("Could not group task 'async_sleep'");
-  taskbuflist_t outputs = await_group(&tg);
-  int* add_res = EZTASK_OUTPUT(int, outputs, add_id);
-  int* sub_res = EZTASK_OUTPUT(int, outputs, sub_id);
+  const taskint_t taskCount = await_group(&tg);
+  if(add_id > taskCount) perror("Could not read output of task 'add'");
+  if(sub_id > taskCount) perror("Could not read output of task 'add'");
+  if(sleep_id > taskCount) perror("Could not read output of task 'async_sleep'");
+  int* add_res = EZTASK_OUTPUT(int, tg._outbufs, add_id);
+  int* sub_res = EZTASK_OUTPUT(int, tg._outbufs, sub_id);
   printf("add: %d, sub:%d\n", add_res ? *add_res : 0 , sub_res ? *sub_res : 0);
-  free(outputs.bufList);
   clean_group(&tg);
   return 0;
 }

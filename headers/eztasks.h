@@ -5,7 +5,6 @@
 #include <group.h>
 #include <types.h>
 #include <macros.h>
-
-taskbuf_t   empty_taskbuf   (void);
+#include <helper.h>
 
 #endif // __EZTASKS_H__

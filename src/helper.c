@@ -72,3 +72,14 @@ task_t *dequeue_task(taskgroup_t *tg) {
     return next_task;
 }
 
+void* consume_task_output(taskbuf_t* outbufs, taskid_t tid, void* dest) {
+    if(tid && outbufs) {
+        if(dest && outbufs[tid-1].buffer) {
+            memmove(dest, outbufs[tid-1].buffer, outbufs[tid-1].size);
+            free(outbufs[tid-1].buffer);
+            outbufs[tid-1] = empty_taskbuf();
+            return dest;
+        }
+    }
+    return NULL;
+}

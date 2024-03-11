@@ -8,7 +8,6 @@ typedef uint64_t                taskint_t;
 typedef long double             tasknum_t;
 typedef bool                    taskbool_t;
 typedef struct _taskbuf_t       taskbuf_t;
-typedef struct _taskbuflist_t   taskbuflist_t;
 typedef unsigned long long      taskid_t;
 typedef struct _task_t          task_t;
 typedef struct _taskqueue_t     taskqueue_t;
@@ -34,10 +33,6 @@ struct _taskbuf_t {
     uint64_t        size;
 };
 
-struct _taskbuflist_t {
-    taskbuf_t*      bufList;
-    const uint64_t  length;
-};
 
 struct _taskstate_t {
     taskint_t       _iter_count;
@@ -66,6 +61,7 @@ struct _taskgroup_t {
     taskqueue_t*    _task_queue;
     taskint_t       _task_count;
     taskid_t        _last_task_id;
+    taskbuf_t*      _outbufs;
 };
 
 #endif // __EZTASKS_TYPES_H__

@@ -15,6 +15,7 @@ void init_group(taskgroup_t *tg) {
         tg->_task_count = 0ULL;
         tg->_last_task_id = 0ULL;
         tg->_task_queue = EZT_QNIL;
+        tg->_outbufs = (taskbuf_t*) NULL;
     }
 }
 
@@ -25,6 +26,9 @@ void clean_group(taskgroup_t *tg) {
             if (task) {
                 free_task(task);
             }
+        }
+        if(tg->_outbufs) {
+            free(tg->_outbufs);
         }
         init_group(tg);
     }
@@ -43,30 +47,21 @@ void extend_group(taskgroup_t *otg, taskgroup_t *etg) {
     }
 }
 
-taskbuflist_t await_group(taskgroup_t *tg)
+const taskint_t await_group(taskgroup_t *tg)
 {
     if(!tg || !(tg->_task_count) || !(tg->_task_queue)) {
-        return (taskbuflist_t) {
-            .bufList = (taskbuf_t*) NULL,
-            .length = 0ULL
-        };
+        return 0ULL;
     }
     taskint_t initial_task_count = tg->_task_count;
-    taskbuflist_t task_bufs = {
-        .bufList = (taskbuf_t*) malloc(sizeof(taskbuf_t) * initial_task_count),
-        .length = initial_task_count
-    };
-    if(!(task_bufs.bufList)) {
+    tg->_outbufs = (taskbuf_t*) malloc(sizeof(taskbuf_t) * initial_task_count);
+    if(!(tg->_outbufs)) {
         while(tg->_task_queue) {
             task_t* task = dequeue_task(tg);
             if(task) {
                 free_task(task);
             }
         }
-        return (taskbuflist_t) {
-            .bufList = (taskbuf_t*) NULL,
-            .length = 0ULL
-        };
+        return 0ULL;
     }
     while (tg->_task_queue) {
         task_t *task = dequeue_task(tg);
@@ -93,15 +88,15 @@ taskbuflist_t await_group(taskgroup_t *tg)
                         tg->_task_count++;
                     }
                 } else if (status == TS_COMPLETED) {
-                    if(task->_id <= task_bufs.length) {
+                    if(task->_id <= initial_task_count) {
                         taskbuf_t _temp_taskbuf;
                         copy_taskbuf(&_temp_taskbuf, task->_outBuf);
-                        task_bufs.bufList[task->_id-1] = _temp_taskbuf;                 
+                        tg->_outbufs[task->_id-1] = _temp_taskbuf;                 
                     }
                     free_task(task);
                 }
             }
         }
     }
-    return task_bufs;
+    return initial_task_count;
 }
