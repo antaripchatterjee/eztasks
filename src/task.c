@@ -1,6 +1,7 @@
 #include "task.h"
 #include "helper.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -42,9 +43,9 @@ task_t* create_new_task (void* inBufPtr,  taskint_t inBufSize, taskint_t outBufS
             ._data_ptr = NULL
         };
         new_task->_startedAt = 0UL;
-        new_task->_timeoutMs = EZT_NO_TIMEOUT;
+        new_task->_timeoutMs = EZT_NO_TIMEOUT_MS;
         new_task->_onTimeout = EZT_NO_TIMEOUT_ACTION;
-        new_task->_condition = EZT_NO_CONDITION;
+        new_task->_condition = EZT_NO_TIMEOUT_COND;
     }
     return new_task;
 }
@@ -102,16 +103,16 @@ void set_task_condition(task_t* task, taskbool_t* condition) {
     }
 }
 
-taskbool_t is_task_timedout(task_t* task) {
-    if(!task) return true;
-    if(task->_condition && *(task->_condition)) return true; 
-    if(task->_timeoutMs == EZT_NO_TIMEOUT) {
-        return false;
-    }
-    tasknum_t taskElapsedTime = (((tasknum_t)((taskint_t) clock() - 
+tasktime_t is_task_timedout(task_t* task) {
+    if(!task) return (tasktime_t) 1;
+    tasktime_t taskTimedOutAt = (((tasktime_t)((taskint_t) clock() - 
         task->_startedAt))*1000)/CLOCKS_PER_SEC;
-    if(taskElapsedTime >= task->_timeoutMs) {
-        return true;
+    if(task->_condition && *(task->_condition)) return taskTimedOutAt; 
+    if(task->_timeoutMs == EZT_NO_TIMEOUT_MS) {
+        return EZT_NO_TIMEOUT_MS;
     }
-    return false;
+    if(taskTimedOutAt >= task->_timeoutMs) {
+        return taskTimedOutAt;
+    }
+    return EZT_NO_TIMEOUT_MS;
 }

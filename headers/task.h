@@ -16,7 +16,7 @@ taskid_t    group_task_into     (taskgroup_t *tg, task_t *task);
 taskid_t*   gather_tasks        (taskgroup_t* tg, taskint_t taskCount, task_t* taskList[]);
 void        set_task_timeout    (task_t* task, tasknum_t timeoutMs, tasktimeoufn_t onTimeout);
 void        set_task_condition  (task_t* task, taskbool_t* condition);
-taskbool_t  is_task_timedout    (task_t* task);
+tasktime_t  is_task_timedout    (task_t* task);
 void        read_task_input     (task_t *task, void *input);
 void        write_task_output   (task_t *task, void *output);
 

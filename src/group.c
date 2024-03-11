@@ -67,9 +67,10 @@ const taskint_t await_group(taskgroup_t *tg)
         task_t *task = dequeue_task(tg);
         if (task) {
             tg->_task_count--;
-            if(is_task_timedout(task)) {
+            tasktime_t timedOutAt;
+            if((timedOutAt = is_task_timedout(task)) > 0) {
                 if(task->_onTimeout != EZT_NO_TIMEOUT_ACTION) {
-                    task->_onTimeout(task);
+                    task->_onTimeout(task, timedOutAt);
                     free_task(task);
                 } 
             } else {

@@ -79,13 +79,17 @@ task_t* sub(int i, int j) {
   return task;
 }
 
+void task_sleep_on_timeout(task_t* task, tasktime_t elapsedTime) {
+  printf("Time taken by task %llu is %lf milliseconds\n", task->_id, elapsedTime);
+}
+
 taskstatus_t task_sleep(task_t* task) {
   return TS_INPROGRESS;
 }
 
 task_t* async_sleep(double ms) {
   task_t* task = create_new_task(NULL, 0, 0, &task_sleep);
-  set_task_timeout(task, (tasknum_t) ms, EZT_NO_TIMEOUT_ACTION);
+  set_task_timeout(task, (tasknum_t) ms, &task_sleep_on_timeout);
   set_task_condition(task, &cond);
   return task;
 }

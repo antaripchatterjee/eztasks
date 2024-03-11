@@ -6,6 +6,7 @@
 
 typedef uint64_t                taskint_t;
 typedef long double             tasknum_t;
+typedef double                  tasktime_t;
 typedef bool                    taskbool_t;
 typedef struct _taskbuf_t       taskbuf_t;
 typedef unsigned long long      taskid_t;
@@ -17,7 +18,7 @@ typedef enum _taskstatus_t      taskstatus_t;
 
 
 typedef taskstatus_t (*taskfn_t) (task_t*);
-typedef void (*tasktimeoufn_t) (task_t *);
+typedef void (*tasktimeoufn_t) (task_t *, tasktime_t);
 
 
 enum _taskstatus_t {
