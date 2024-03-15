@@ -15,10 +15,6 @@ void free_task (task_t* task) {
         if(task->_outBuf.buffer) {
             free(task->_outBuf.buffer);
         }
-        if(task->_state._data_ptr) 
-        {
-            free(task->_state._data_ptr);
-        }
         free(task);
     }
 }
@@ -39,13 +35,11 @@ task_t* create_new_task (void* inBufPtr,  taskint_t inBufSize, taskint_t outBufS
         new_task->_children = (taskgroup_t *) NULL;
         new_task->_state = (taskstate_t) {
             ._iter_count = 0UL,
-            ._data_size = 0UL,
-            ._data_ptr = NULL
+            ._state_ptr = NULL
         };
         new_task->_startedAt = 0UL;
         new_task->_timeoutMs = EZT_NO_TIMEOUT_MS;
         new_task->_onTimeout = EZT_NO_TIMEOUT_ACTION;
-        new_task->_condition = EZT_NO_TIMEOUT_COND;
     }
     return new_task;
 }
@@ -97,22 +91,15 @@ void set_task_timeout(task_t* task, tasknum_t timeoutMs, tasktimeoufn_t onTimeou
     }
 }
 
-void set_task_condition(task_t* task, taskbool_t* condition) {
-    if(task) {
-        task->_condition = condition;
-    }
-}
-
 tasktime_t is_task_timedout(task_t* task) {
     if(!task) return (tasktime_t) 1;
-    tasktime_t taskTimedOutAt = (((tasktime_t)((taskint_t) clock() - 
+    tasktime_t taskExecTime = (((tasktime_t)((taskint_t) clock() - 
         task->_startedAt))*1000)/CLOCKS_PER_SEC;
-    if(task->_condition && *(task->_condition)) return taskTimedOutAt; 
     if(task->_timeoutMs == EZT_NO_TIMEOUT_MS) {
         return EZT_NO_TIMEOUT_MS;
     }
-    if(taskTimedOutAt >= task->_timeoutMs) {
-        return taskTimedOutAt;
+    if(taskExecTime >= task->_timeoutMs) {
+        return taskExecTime;
     }
     return EZT_NO_TIMEOUT_MS;
 }

@@ -47,8 +47,51 @@ void extend_group(taskgroup_t *otg, taskgroup_t *etg) {
     }
 }
 
-const taskint_t await_group(taskgroup_t *tg)
-{
+taskbuf_t await_one(taskgroup_t *tg, taskbool_t completeOnTimeout) {
+    taskbuf_t _temp_taskbuf = empty_taskbuf();
+    int completed = 0;
+    while (tg && tg->_task_queue) {
+        task_t *task = dequeue_task(tg);
+        if (task) {
+            tg->_task_count--;
+            if(completed) {
+                free_task(task);
+                continue;
+            }
+            tasktime_t taskExecTime;
+            if((taskExecTime = is_task_timedout(task)) > 0) {
+                if(task->_onTimeout != EZT_NO_TIMEOUT_ACTION) {
+                    task->_onTimeout(task, taskExecTime);
+                    if(completeOnTimeout) {
+                        copy_taskbuf(&_temp_taskbuf, task->_outBuf);
+                        completed = 1;
+                    }
+                    free_task(task);
+                } 
+            } else {
+                task->_state._iter_count++;
+                taskstatus_t status = task->_taskFn(task);
+                if (status == TS_INPROGRESS) {
+                    if(task->_children) {
+                        extend_group(tg, task->_children);
+                        free(task->_children);
+                        task->_children = (taskgroup_t*) NULL;
+                    }
+                    if (enqueue_task(tg, task)) {
+                        tg->_task_count++;
+                    }
+                } else if (status == TS_COMPLETED) {
+                    copy_taskbuf(&_temp_taskbuf, task->_outBuf);              
+                    free_task(task);
+                    completed = 1;
+                }
+            }
+        }
+    }
+    return _temp_taskbuf;
+}
+
+taskint_t await_group(taskgroup_t *tg) {
     if(!tg || !(tg->_task_count) || !(tg->_task_queue)) {
         return 0ULL;
     }
@@ -67,10 +110,10 @@ const taskint_t await_group(taskgroup_t *tg)
         task_t *task = dequeue_task(tg);
         if (task) {
             tg->_task_count--;
-            tasktime_t timedOutAt;
-            if((timedOutAt = is_task_timedout(task)) > 0) {
+            tasktime_t taskExecTime;
+            if((taskExecTime = is_task_timedout(task)) > 0) {
                 if(task->_onTimeout != EZT_NO_TIMEOUT_ACTION) {
-                    task->_onTimeout(task, timedOutAt);
+                    task->_onTimeout(task, taskExecTime);
                     free_task(task);
                 } 
             } else {
@@ -84,8 +127,7 @@ const taskint_t await_group(taskgroup_t *tg)
                     }
                 }
                 if (status == TS_INPROGRESS) {
-                    if (enqueue_task(tg, task))
-                    {
+                    if (enqueue_task(tg, task)) {
                         tg->_task_count++;
                     }
                 } else if (status == TS_COMPLETED) {

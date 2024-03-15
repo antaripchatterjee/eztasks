@@ -37,8 +37,7 @@ struct _taskbuf_t {
 
 struct _taskstate_t {
     taskint_t       _iter_count;
-    taskint_t       _data_size;
-    void*           _data_ptr;
+    void*           _state_ptr;
 };
 
 struct _task_t {
@@ -51,7 +50,6 @@ struct _task_t {
     taskint_t       _startedAt;
     tasknum_t       _timeoutMs;
     tasktimeoufn_t  _onTimeout;
-    taskbool_t*     _condition;
 };
 
 struct _taskqueue_t {

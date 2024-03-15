@@ -2,17 +2,38 @@
 #include <stdlib.h>
 #include <eztasks.h>
 
-taskbool_t cond = false;
+void task_sleep_on_timeout(task_t* task, tasktime_t execTime) {
+  printf("Time taken by task %llu is %lf milliseconds\n", task->_id, execTime);
+}
+
+taskstatus_t task_sleep(task_t* task) {
+  return TS_INPROGRESS;
+}
+
+task_t* async_sleep(double ms) {
+  task_t* task = create_new_task(NULL, 0, 0, &task_sleep);
+  set_task_timeout(task, (tasknum_t) ms, &task_sleep_on_timeout);
+  return task;
+}
+
 
 taskstatus_t my_task_mul(task_t *task) {
-  taskint_t iterCount = task->_state._iter_count;
   printf("Task mul got id: %llu\n", task->_id);
   int input[2];
   read_task_input(task, input);
-  int output = (int) iterCount * (input[0] * input[1]);
-  printf("mul[%llu]: %d\n", iterCount, output);
-  if(iterCount == 100) cond = true;
-  return iterCount == 100 ? TS_COMPLETED : TS_INPROGRESS;
+  int output = input[0] * input[1];
+  taskgroup_t tg;
+  init_group(&tg);
+  task_t* tasks[2] = {
+    async_sleep(3000),
+    async_sleep(2500)
+  };
+  taskid_t* tids = gather_tasks(&tg, 2, tasks);
+  free(tids);
+  await_one(&tg, true);
+  clean_group(&tg);
+  printf("mul: %d\n", output);
+  return TS_COMPLETED;
 }
 
 
@@ -79,21 +100,6 @@ task_t* sub(int i, int j) {
   return task;
 }
 
-void task_sleep_on_timeout(task_t* task, tasktime_t elapsedTime) {
-  printf("Time taken by task %llu is %lf milliseconds\n", task->_id, elapsedTime);
-}
-
-taskstatus_t task_sleep(task_t* task) {
-  return TS_INPROGRESS;
-}
-
-task_t* async_sleep(double ms) {
-  task_t* task = create_new_task(NULL, 0, 0, &task_sleep);
-  set_task_timeout(task, (tasknum_t) ms, &task_sleep_on_timeout);
-  set_task_condition(task, &cond);
-  return task;
-}
-
 
 int main(int argc, char const *argv[])
 {
@@ -112,7 +118,7 @@ int main(int argc, char const *argv[])
   if(!add_id) perror("Could not group task 'add'");
   if(!sub_id) perror("Could not group task 'sub'");
   if(!sleep_id) perror("Could not group task 'async_sleep'");
-  const taskint_t taskCount = await_group(&tg);
+  taskint_t taskCount = await_group(&tg);
   if(add_id > taskCount) perror("Could not read output of task 'add'");
   if(sub_id > taskCount) perror("Could not read output of task 'add'");
   if(sleep_id > taskCount) perror("Could not read output of task 'async_sleep'");
