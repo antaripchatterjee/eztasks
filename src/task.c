@@ -53,16 +53,18 @@ taskid_t get_task_id(task_t* task) {
 
 
 
-void group_into(task_t *task, taskgroup_t *tg)
+taskid_t group_into(task_t *task, taskgroup_t *tg)
 {
     if (tg && task) {
         if (enqueue_task(tg, task)) {
             tg->_task_count++;
             task->_startedAt = (taskint_t) clock();
             task->_id = ++(tg->_last_task_id);
+            return task->_id;
         }
         free_task(task);
     }
+    return EZ_ZEROTID;
 }
 
 void read_task_input(task_t *task, void *input)
@@ -79,7 +81,7 @@ void write_task_output(task_t *task, void *output)
     }
 }
 
-void set_task_timeout(task_t* task, tasknum_t timeoutMs, tasktimeoufn_t onTimeout) {
+void set_task_timeout(task_t* task, taskdec_t timeoutMs, tasktimeoufn_t onTimeout) {
     if(task) {
         task->_timeoutMs = timeoutMs;
         task->_onTimeout = onTimeout;

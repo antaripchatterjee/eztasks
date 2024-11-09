@@ -5,7 +5,7 @@
 #include <stdbool.h>
 
 typedef uint64_t                taskint_t;
-typedef long double             tasknum_t;
+typedef long double             taskdec_t;
 typedef double                  tasktime_t;
 typedef bool                    taskbool_t;
 typedef struct _taskbuf_t       taskbuf_t;
@@ -48,7 +48,7 @@ struct _task_t {
     taskstate_t     _state;
     taskgroup_t*    _children;
     taskint_t       _startedAt;
-    tasknum_t       _timeoutMs;
+    taskdec_t       _timeoutMs;
     tasktimeoufn_t  _onTimeout;
 };
 

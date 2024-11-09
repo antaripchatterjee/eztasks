@@ -49,8 +49,12 @@ void extend_group(taskgroup_t *otg, taskgroup_t *etg) {
 
 void gather_tasks(taskgroup_t* tg, taskint_t taskCount, task_t* taskList[]) {
     if(tg && taskList) {
-        for(taskint_t i = 0; i < taskCount; i++) {
-            group_into(taskList[i], tg);
+        taskbool_t success = true;
+        for(taskint_t i = 0; success && i < taskCount; i++) {
+            success = group_into(taskList[i], tg) != EZ_ZEROTID;
+        }
+        if(success) {
+            
         }
     }
 }

@@ -13,7 +13,7 @@ taskstatus_t task_sleep(task_t* task) {
 
 task_t* async_sleep(double ms) {
   task_t* task = create_new_task(NULL, 0, 0, &task_sleep);
-  set_task_timeout(task, (tasknum_t) ms, &task_sleep_on_timeout);
+  set_task_timeout(task, (taskdec_t) ms, &task_sleep_on_timeout);
   return task;
 }
 
