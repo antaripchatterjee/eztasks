@@ -28,7 +28,7 @@ task_t* create_new_task (void* inBufPtr,  taskint_t inBufSize, taskint_t outBufS
             to_taskbuf(inBufPtr, inBufSize) : empty_taskbuf();
         taskbuf_t outBuf = outBufSize ? 
             zero_taskbuf(outBufSize) : empty_taskbuf();
-        new_task->_id = (taskint_t) 0;
+        new_task->_id = EZ_ZEROTID;
         new_task->_inBuf = inBuf;
         new_task->_outBuf = outBuf;
         new_task->_taskFn = taskFn;
@@ -44,30 +44,25 @@ task_t* create_new_task (void* inBufPtr,  taskint_t inBufSize, taskint_t outBufS
     return new_task;
 }
 
+taskid_t get_task_id(task_t* task) {
+    if(task) {
+        return task->_id;
+    }
+    return EZ_ZEROTID;
+}
 
 
-taskid_t group_task_into(taskgroup_t *tg, task_t *task)
+
+void group_into(task_t *task, taskgroup_t *tg)
 {
     if (tg && task) {
         if (enqueue_task(tg, task)) {
             tg->_task_count++;
             task->_startedAt = (taskint_t) clock();
             task->_id = ++(tg->_last_task_id);
-            return task->_id;
         }
         free_task(task);
     }
-    return (taskid_t) 0;
-}
-
-taskid_t* gather_tasks(taskgroup_t* tg, taskint_t taskCount, task_t* taskList[]) {
-    if(!tg || !taskCount || !taskList) return (taskid_t*) NULL; 
-    taskid_t* tids = (taskid_t*) malloc(sizeof(taskid_t) * taskCount);
-    if(!tids) return (taskid_t*) NULL;
-    for(taskint_t i = 0; i < taskCount; i++) {
-        tids[i] = group_task_into(tg, taskList[i]);
-    }
-    return tids;
 }
 
 void read_task_input(task_t *task, void *input)
@@ -91,7 +86,7 @@ void set_task_timeout(task_t* task, tasknum_t timeoutMs, tasktimeoufn_t onTimeou
     }
 }
 
-tasktime_t is_task_timedout(task_t* task) {
+tasktime_t is_timeout(task_t* task) {
     if(!task) return (tasktime_t) 1;
     tasktime_t taskExecTime = (((tasktime_t)((taskint_t) clock() - 
         task->_startedAt))*1000)/CLOCKS_PER_SEC;

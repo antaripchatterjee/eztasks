@@ -4,6 +4,10 @@
 #include "macros.h"
 #include "types.h"
 
+#define TASKCOUNT(_TASKS) (sizeof(_TASKS)/sizeof(task_t*))
+#define EZ_ZEROTID ((taskid_t) 0)
+#define EZ_TID(T) get_task_id(T)
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -12,10 +16,10 @@ extern "C"
 
 void        free_task           (task_t* task);
 task_t*     create_new_task     (void* inBufPtr, taskint_t inBufSize, taskint_t outBufSize, taskfn_t taskFn);
-taskid_t    group_task_into     (taskgroup_t *tg, task_t *task);
-taskid_t*   gather_tasks        (taskgroup_t* tg, taskint_t taskCount, task_t* taskList[]);
+taskid_t    get_task_id         (task_t* task);
+void        group_into          (task_t *task, taskgroup_t *tg);
 void        set_task_timeout    (task_t* task, tasknum_t timeoutMs, tasktimeoufn_t onTimeout);
-tasktime_t  is_task_timedout    (task_t* task);
+tasktime_t  is_timeout          (task_t* task);
 void        read_task_input     (task_t *task, void *input);
 void        write_task_output   (task_t *task, void *output);
 
