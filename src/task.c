@@ -7,7 +7,7 @@
 #include <time.h>
 
 
-void free_task (task_t* task) {
+void ezt_task__free (task_t* task) {
     if(task) {
         if(task->_inBuf.buffer) {
             free(task->_inBuf.buffer);
@@ -19,7 +19,7 @@ void free_task (task_t* task) {
     }
 }
 
-task_t* create_new_task (void* inBufPtr,  taskint_t inBufSize, taskint_t outBufSize, taskfn_t taskFn) {
+task_t* ezt_task__new (void* inBufPtr,  taskint_t inBufSize, taskint_t outBufSize, taskfn_t taskFn) {
     task_t *new_task = (task_t *)malloc(sizeof(task_t));
     if (new_task)
     {
@@ -44,7 +44,7 @@ task_t* create_new_task (void* inBufPtr,  taskint_t inBufSize, taskint_t outBufS
     return new_task;
 }
 
-taskid_t get_task_id(task_t* task) {
+taskid_t ezt_task__id(task_t* task) {
     if(task) {
         return task->_id;
     }
@@ -53,7 +53,7 @@ taskid_t get_task_id(task_t* task) {
 
 
 
-taskid_t group_into(task_t *task, taskgroup_t *tg)
+taskid_t ezt_task__add_to(task_t *task, taskgroup_t *tg)
 {
     if (tg && task) {
         if (enqueue_task(tg, task)) {
@@ -62,33 +62,33 @@ taskid_t group_into(task_t *task, taskgroup_t *tg)
             task->_id = ++(tg->_last_task_id);
             return task->_id;
         }
-        free_task(task);
+        ezt_task__free(task);
     }
     return EZ_ZEROTID;
 }
 
-void read_task_input(task_t *task, void *input)
+void ezt_task__read_in(task_t *task, void *input)
 {
     if (task->_id && task->_inBuf.buffer && input) {
         memmove(input, task->_inBuf.buffer, task->_inBuf.size);
     }
 }
 
-void write_task_output(task_t *task, void *output)
+void ezt_task__write_out(task_t *task, void *output)
 {
     if (task->_id && task->_outBuf.buffer && output) {
         memmove(task->_outBuf.buffer, output, task->_outBuf.size);
     }
 }
 
-void set_task_timeout(task_t* task, taskdec_t timeoutMs, tasktimeoufn_t onTimeout) {
+void ezt_task__set_timeout(task_t* task, taskdec_t timeoutMs, tasktimeoufn_t onTimeout) {
     if(task) {
         task->_timeoutMs = timeoutMs;
         task->_onTimeout = onTimeout;
     }
 }
 
-tasktime_t is_timeout(task_t* task) {
+tasktime_t ezt_task__is_timeout(task_t* task) {
     if(!task) return (tasktime_t) 1;
     tasktime_t taskExecTime = (((tasktime_t)((taskint_t) clock() - 
         task->_startedAt))*1000)/CLOCKS_PER_SEC;

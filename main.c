@@ -12,8 +12,8 @@ taskstatus_t task_sleep(task_t* task) {
 }
 
 task_t* async_sleep(double ms) {
-  task_t* task = create_new_task(NULL, 0, 0, &task_sleep);
-  set_task_timeout(task, (taskdec_t) ms, &task_sleep_on_timeout);
+  task_t* task = ezt_task__new(NULL, 0, 0, &task_sleep);
+  ezt_task__set_timeout(task, (taskdec_t) ms, &task_sleep_on_timeout);
   return task;
 }
 
@@ -21,19 +21,19 @@ task_t* async_sleep(double ms) {
 taskstatus_t my_task_mul(task_t *task) {
   printf("Task mul got id: %llu\n", task->_id);
   int input[2];
-  read_task_input(task, input);
+  ezt_task__read_in(task, input);
   int output = input[0] * input[1];
   // taskgroup_t tg;
-  // init_group(&tg);
+  // ezt_taskgroup__init(&tg);
   // task_t* tasks[2] = {
   //   async_sleep(9000),
   //   async_sleep(2500)
   // };
 
-  // taskid_t tids[TASKCOUNT(tasks)] = {EZ_ZEROTID};
-  // gather_tasks(&tg, TASKCOUNT(tasks), tasks, tids);
-  // await_any(&tg);
-  // clean_group(&tg);
+  // taskid_t tids[EZT_TASK_COUNT(tasks)] = {EZ_ZEROTID};
+  // ezt_taskgroup__gather(&tg, EZT_TASK_COUNT(tasks), tasks, tids);
+  // ezt_taskgroup__await_any(&tg);
+  // ezt_taskgroup__clean(&tg);
   printf("mul: %d\n", output);
   return TS_COMPLETED;
 }
@@ -41,7 +41,7 @@ taskstatus_t my_task_mul(task_t *task) {
 
 task_t* mul(int i, int j) {
   int _calc_input[2] = { i, j };
-  task_t* task = create_new_task(
+  task_t* task = ezt_task__new(
     _calc_input, // input buffer pointer
     sizeof(int[2]), // input buffer size
     0, // output buffer pointer
@@ -55,17 +55,17 @@ taskstatus_t my_task_add(task_t *task)
 {
   printf("Task add got id: %llu\n", task->_id);
   int input[2];
-  read_task_input(task, input);
-  // task->_children = create_new_group();
+  ezt_task__read_in(task, input);
+  // task->_children = taskgroup__new();
   // task_t* tasks[] = {
   //   mul(input[0], input[1])
   // };
-  // taskid_t tids[TASKCOUNT(tasks)] = {EZ_ZEROTID};
-  // gather_tasks(task->_children, TASKCOUNT(tasks), tasks);
+  // taskid_t tids[EZT_TASK_COUNT(tasks)] = {EZ_ZEROTID};
+  // ezt_taskgroup__gather(task->_children, EZT_TASK_COUNT(tasks), tasks);
   // taskid_t mul_id = tids[0];
   // if(!mul_id) perror("Could not group task 'mul'");
   int output = input[0] + input[1];
-  write_task_output(task, &output);
+  ezt_task__write_out(task, &output);
   return TS_COMPLETED;
 }
 
@@ -73,16 +73,16 @@ taskstatus_t my_task_sub(task_t *task)
 {
   printf("Task sub got id: %llu\n", task->_id);
   int input[2];
-  read_task_input(task, input);
+  ezt_task__read_in(task, input);
   int output = input[0] - input[1];
-  write_task_output(task, &output);
+  ezt_task__write_out(task, &output);
   return TS_COMPLETED;
 }
 
 
 task_t* add(int i, int j) {
   int _calc_input[2] = { i, j };
-  task_t* task = create_new_task(
+  task_t* task = ezt_task__new(
     _calc_input, // input buffer pointer
     sizeof(int[2]), // input buffer size
     sizeof(int), // output buffer pointer
@@ -93,7 +93,7 @@ task_t* add(int i, int j) {
 
 task_t* sub(int i, int j) {
   int _calc_input[2] = { i, j };
-  task_t* task = create_new_task(
+  task_t* task = ezt_task__new(
     _calc_input, // input buffer pointer
     sizeof(int[2]), // input buffer size
     sizeof(int), // output buffer pointer
@@ -106,19 +106,38 @@ task_t* sub(int i, int j) {
 int main(int argc, char const *argv[])
 {
   taskgroup_t tg;
-  init_group(&tg);
+
   task_t* t_add = add(10, 15);
   task_t* t_sub = sub(17, 9);
   task_t* t_sleep = async_sleep(4500);
   task_t* tasks[] = { t_add, t_sub, t_sleep };
-  gather_tasks(&tg, TASKCOUNT(tasks), tasks);
-  if(!get_task_id(t_add)) perror("Could not group task 'add'");
-  if(!get_task_id(t_sub)) perror("Could not group task 'sub'");
-  if(!get_task_id(t_sleep)) perror("Could not group task 'async_sleep'");
-  await_group(&tg);
+  
+  taskint_t taskCount = EZT_TASK_COUNT(tasks);
+
+  ezt_taskgroup__init(&tg, taskCount);
+  if(!EZT_TG_INITIATED(&tg)) {
+    perror("Could not initiate task group 'tg'");
+    return -1;
+  }
+  ezt_taskgroup__gather(&tg, taskCount, tasks);
+
+  if(!EZT_ID(t_add)) {
+    perror("Could not group task 'add'");
+    return -1;
+  }
+  if(!EZT_ID(t_sub)) {
+    perror("Could not group task 'sub'");
+    return -1;
+  }
+  if(!EZT_ID(t_sleep)) {
+    perror("Could not group task 'async_sleep'");
+    return -1;
+  }
+  taskint_t awaitedCount = ezt_taskgroup__await(&tg, 0); // wait for all
+  printf("Awaited for %llu tasks\n", awaitedCount);
   // int* add_res = EZTASK_OUTPUT(int, tg._outbufs, add_id);
   // int* sub_res = EZTASK_OUTPUT(int, tg._outbufs, sub_id);
   // printf("add: %d, sub:%d\n", add_res ? *add_res : 0 , sub_res ? *sub_res : 0);
-  clean_group(&tg);
+  ezt_taskgroup__clean(&tg);
   return 0;
 }

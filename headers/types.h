@@ -62,6 +62,7 @@ struct _taskgroup_t {
     taskint_t       _task_count;
     taskid_t        _last_task_id;
     taskbuf_t*      _outbufs;
+    taskint_t       _max_outbuf_count;
 };
 
 #endif // __EZTASKS_TYPES_H__

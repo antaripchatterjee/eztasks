@@ -4,9 +4,9 @@
 #include "macros.h"
 #include "types.h"
 
-#define TASKCOUNT(_TASKS) (sizeof(_TASKS)/sizeof(task_t*))
+#define EZT_TASK_COUNT(_TASKS) (sizeof(_TASKS)/sizeof(task_t*))
 #define EZ_ZEROTID ((taskid_t) 0)
-#define EZ_TID(T) get_task_id(T)
+#define EZT_ID(T) ezt_task__id(T)
 
 #ifdef __cplusplus
 extern "C"
@@ -14,14 +14,14 @@ extern "C"
 #endif // __cplusplus
 
 
-void        free_task           (task_t* task);
-task_t*     create_new_task     (void* inBufPtr, taskint_t inBufSize, taskint_t outBufSize, taskfn_t taskFn);
-taskid_t    get_task_id         (task_t* task);
-taskid_t    group_into          (task_t *task, taskgroup_t *tg);
-void        set_task_timeout    (task_t* task, taskdec_t timeoutMs, tasktimeoufn_t onTimeout);
-tasktime_t  is_timeout          (task_t* task);
-void        read_task_input     (task_t *task, void *input);
-void        write_task_output   (task_t *task, void *output);
+task_t*     ezt_task__new           (void* inBufPtr, taskint_t inBufSize, taskint_t outBufSize, taskfn_t taskFn);
+void        ezt_task__free          (task_t* task);
+taskid_t    ezt_task__id            (task_t* task);
+taskid_t    ezt_task__add_to        (task_t *task, taskgroup_t *tg);
+void        ezt_task__set_timeout   (task_t* task, taskdec_t timeoutMs, tasktimeoufn_t onTimeout);
+tasktime_t  ezt_task__is_timeout    (task_t* task);
+void        ezt_task__read_in       (task_t *task, void *input);
+void        ezt_task__write_out     (task_t *task, void *output);
 
 
 #ifdef __cplusplus
