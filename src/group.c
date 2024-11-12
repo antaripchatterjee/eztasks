@@ -43,6 +43,11 @@ void ezt_taskgroup__clean(taskgroup_t *tg) {
             }
         }
         if(tg->_outbufs) {
+            for(taskint_t i = 0; i < tg->_max_outbuf_count; i++) {
+                if(tg->_outbufs[i].buffer){
+                    free(tg->_outbufs[i].buffer);
+                }
+            }
             free(tg->_outbufs);
         }
         ezt_taskgroup__init(tg, 0);
