@@ -68,8 +68,8 @@ void ezt_taskgroup__gather(taskgroup_t* tg, taskint_t taskCount, task_t* taskLis
         for(taskint_t i = 0; success && i < taskCount; i++) {
             success = ezt_task__add_to(taskList[i], tg) != EZ_ZEROTID;
         }
-        if(success) {
-            
+        if(!success) {
+            ezt_taskgroup__clean(tg);
         }
     }
 }
