@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <eztasks.h>
 
+#define TASK_COUNT 3
+
 void task_sleep_on_timeout(task_t* task, tasktime_t execTime) {
   printf("Time taken by task %llu is %lf milliseconds\n", task->_id, execTime);
 }
@@ -107,37 +109,30 @@ int main(int argc, char const *argv[])
 {
   taskgroup_t tg;
 
-  task_t* t_add = add(10, 15);
-  task_t* t_sub = sub(17, 9);
-  task_t* t_sleep = async_sleep(4500);
-  task_t* tasks[] = { t_add, t_sub, t_sleep };
-  
-  taskint_t taskCount = EZT_TASK_COUNT(tasks);
-
-  ezt_taskgroup__init(&tg, taskCount);
+  ezt_taskgroup__init(&tg, TASK_COUNT);
   if(!EZT_TG_INITIATED(&tg)) {
     perror("Could not initiate task group 'tg'");
     return -1;
   }
-  ezt_taskgroup__gather(&tg, taskCount, tasks);
 
-  if(!EZT_ID(t_add)) {
-    perror("Could not group task 'add'");
+  task_t* t_add = add(10, 15);
+  task_t* t_sub = sub(17, 9);
+  task_t* t_sleep = async_sleep(4500);
+  task_t* tasks[TASK_COUNT] = { t_add, t_sub, t_sleep };
+  
+  ezt_taskgroup__gather(&tg, TASK_COUNT, tasks);
+
+  if(!EZT_TG_INITIATED(&tg)) {
+    perror("Could not gather tasks.");
+    ezt_task__free(t_add);
+    ezt_task__free(t_sub);
+    ezt_task__free(t_sleep);
     return -1;
   }
-  if(!EZT_ID(t_sub)) {
-    perror("Could not group task 'sub'");
-    return -1;
-  }
-  if(!EZT_ID(t_sleep)) {
-    perror("Could not group task 'async_sleep'");
-    return -1;
-  }
+
+  
   taskint_t awaitedCount = ezt_taskgroup__await(&tg, 0); // wait for all
-  printf("Awaited for %llu tasks\n", awaitedCount);
-  // int* add_res = EZTASK_OUTPUT(int, tg._outbufs, add_id);
-  // int* sub_res = EZTASK_OUTPUT(int, tg._outbufs, sub_id);
-  // printf("add: %d, sub:%d\n", add_res ? *add_res : 0 , sub_res ? *sub_res : 0);
+  
   ezt_taskgroup__clean(&tg);
   return 0;
 }
