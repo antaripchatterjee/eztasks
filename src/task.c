@@ -19,7 +19,7 @@ void ezt_task__free (task_t* task) {
     }
 }
 
-task_t* ezt_task__new (void* inBufPtr,  uint64_t inBufSize, uint64_t outBufSize, taskfn_t taskFn) {
+task_t* ezt_task__new (void* inBufPtr,  uint64_t inBufSize, uint64_t outBufSize, taskfn_t taskFn, uint64_t stateBufMinSize) {
     task_t *new_task = (task_t *)malloc(sizeof(task_t));
     if (new_task)
     {
@@ -28,22 +28,29 @@ task_t* ezt_task__new (void* inBufPtr,  uint64_t inBufSize, uint64_t outBufSize,
             to_taskbuf(inBufPtr, inBufSize) : empty_taskbuf();
         taskbuf_t outBuf = outBufSize ? 
             zero_taskbuf(outBufSize) : empty_taskbuf();
+        uint64_t stateBufSize = round_up_to_1024(stateBufMinSize);
         new_task->_id = EZ_ZEROTID;
         new_task->_inBuf = inBuf;
         new_task->_outBuf = outBuf;
         new_task->_taskFn = taskFn;
         new_task->_children = (taskgroup_t *) NULL;
+        new_task->_startedAt = 0UL;
+        new_task->_timeoutMs = EZT_NO_TIMEOUT_MS;
+        new_task->_onTimeout = EZT_NO_TIMEOUT_ACTION;
         new_task->_state = (taskstate_t) {
             ._iterCount = 0UL,
             ._state = 0,
             ._stateBuf = {
-                ._size = 0UL,
-                ._buffer = NULL
+                ._size = stateBufSize,
+                ._buffer = stateBufSize == 0UL ?
+                    NULL : malloc(stateBufSize)
             }
         };
-        new_task->_startedAt = 0UL;
-        new_task->_timeoutMs = EZT_NO_TIMEOUT_MS;
-        new_task->_onTimeout = EZT_NO_TIMEOUT_ACTION;
+        
+        if(stateBufSize > 0UL && !(new_task->_state._stateBuf._buffer)) {
+            ezt_task__free(new_task);
+            new_task = (task_t*)NULL;
+        }
     }
     return new_task;
 }
@@ -138,4 +145,26 @@ task_t *ezt_task__dequeue(taskgroup_t *tg) {
         free(_temp);
     }
     return next_task;
+}
+
+uint16_t ezt_task__get_state(task_t* task) {
+    if(task) return task->_state._state;
+    return EZT_INVALID_STATE;
+}
+
+void ezt_task__put_state(task_t* task, uint16_t state) {
+    if(task) {
+        task->_state._state = state;
+    }
+}
+
+int ezt_task__update_state(task_t* task, void* buffer, uint64_t size) {
+    if(task && task->_state._stateBuf._buffer && buffer && size > 0UL) {
+        
+    }
+    return 0;
+}
+
+void ezt_task__append_state(task_t* task, void* buffer, uint64_t size) {
+    
 }

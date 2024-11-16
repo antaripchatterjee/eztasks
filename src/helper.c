@@ -44,3 +44,9 @@ void* consume_task_output(taskbuf_t* outbufs, taskid_t tid, void* dest) {
     }
     return NULL;
 }
+
+
+uint64_t round_up_to_1024(uint64_t n) {
+    if(n == 0UL) return 0UL;
+    return ((n + 1023) / 1024) * 1024 + 1;
+}

@@ -10,20 +10,32 @@
 
 
 taskstatus_t task_read_file(task_t* task, tasktime_t execTime) {
-  FILE* fp = NULL;
-  char buffer[BUFFER_SIZE] = { 0 };
-  ezt_task__read_in(task, &fp);
-
-  size_t bytesRead = fread(buffer, sizeof(char), BUFFER_SIZE, fp);
-  if(bytesRead > 0) {
-
-    return TS_INPROGRESS;
+  uint16_t state = ezt_task__get_state(task);
+  taskstatus_t status = TS_FAILED;
+  switch (state) {
+  case STATE_READING:
+    FILE* fp = NULL;
+    char buffer[BUFFER_SIZE+1] = { 0 };
+    ezt_task__read_in(task, &fp);
+    size_t bytesRead = fread(buffer, sizeof(char), BUFFER_SIZE, fp);
+    if(bytesRead > 0) {
+      
+    } else {
+      ezt_task__put_state(task, STATE_WRITE_OUT);
+    }
+    status = TS_INPROGRESS;
+    break;
+  case STATE_WRITE_OUT:
+    break;
+  default: 
+    perror("INVALID STATE: task_read_file");
+    break;
   }
-  return TS_COMPLETED;
+  return status;
 }
 
 task_t* async_read_file(FILE* fp) {
-  task_t* task = ezt_task__new(&fp, sizeof(FILE**), 0, &task_read_file);
+  task_t* task = ezt_task__new(&fp, sizeof(FILE**), 0, &task_read_file, BUFFER_SIZE);
   return task;
 }
 
@@ -36,7 +48,7 @@ taskstatus_t task_wait(task_t* task, tasktime_t execTime) {
 }
 
 task_t* async_wait(double ms) {
-  task_t* task = ezt_task__new((tasktime_t[]) { ms }, sizeof(tasktime_t), 0, &task_wait);
+  task_t* task = ezt_task__new((tasktime_t[]) { ms }, sizeof(tasktime_t), 0, &task_wait, 0);
   return task;
 }
 

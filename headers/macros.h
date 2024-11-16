@@ -6,6 +6,7 @@
 
 #define EZT_TASK_COUNT(_TASKS)              (sizeof(_TASKS)/sizeof(task_t*))
 #define EZT_TASK_ID(T)                      ezt_task__id(T)
+#define EZT_INVALID_STATE                   ((uint16_t) -1)
 
 #define EZ_ZEROTID                          ((taskid_t) 0)
 #define EZT_NO_TIMEOUT_MS                   ((tasktime_t) 0)

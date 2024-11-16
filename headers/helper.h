@@ -16,6 +16,7 @@ void        copy_taskbuf        (taskbuf_t* dest, taskbuf_t src);
 
 
 void*       consume_task_output (taskbuf_t* outbufs, taskid_t tid, void* dest);
+uint64_t    round_up_to_1024    (uint64_t n);
 
 
 #ifdef __cplusplus
