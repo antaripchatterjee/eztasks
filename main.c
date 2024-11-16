@@ -25,14 +25,12 @@ task_t* async_read_file(FILE* fp) {
 taskstatus_t task_wait(task_t* task, tasktime_t execTime) {
   tasktime_t ms;
   ezt_task__read_in(task, &ms);
-  // printf("%lf %lf\n", execTime, ms);
   if(execTime >= ms) return TS_COMPLETED;
   return TS_INPROGRESS;
 }
 
 task_t* async_wait(double ms) {
   task_t* task = ezt_task__new((tasktime_t[]) { ms }, sizeof(tasktime_t), 0, &task_wait);
-  // ezt_task__set_timeout(task, (taskdec_t) ms, &task_wait_on_timeout);
   return task;
 }
 
@@ -68,8 +66,9 @@ int main(int argc, char const *argv[])
     ezt_task__free(t_sleep);
     return -1;
   }
-
+  
   printf("Awaited tasks %lld\n", ezt_taskgroup__await(&tg, 0)); // wait for all
+  
   fclose(fp);
   ezt_taskgroup__clean(&tg);
   return 0;

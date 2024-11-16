@@ -9,8 +9,8 @@ extern "C"
 #endif // __cplusplus
 
 
-taskbuf_t   to_taskbuf          (void* _ptr, taskint_t size);
-taskbuf_t   zero_taskbuf        (taskint_t size);
+taskbuf_t   to_taskbuf          (void* _ptr, uint64_t size);
+taskbuf_t   zero_taskbuf        (uint64_t size);
 taskbuf_t   empty_taskbuf       (void);
 void        copy_taskbuf        (taskbuf_t* dest, taskbuf_t src);
 

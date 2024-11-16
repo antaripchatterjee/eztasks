@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-taskgroup_t* taskgroup__new(taskint_t maxOutBufCount) {
+taskgroup_t* taskgroup__new(uint64_t maxOutBufCount) {
     taskgroup_t* tg = (taskgroup_t*) malloc(sizeof(taskgroup_t));
     ezt_taskgroup__init(tg, maxOutBufCount);
     if(!EZT_TG_INITIATED(tg)) {
@@ -14,7 +14,7 @@ taskgroup_t* taskgroup__new(taskint_t maxOutBufCount) {
     return tg;
 }
 
-void ezt_taskgroup__init(taskgroup_t *tg, taskint_t maxOutBufCount) {
+void ezt_taskgroup__init(taskgroup_t *tg, uint64_t maxOutBufCount) {
     if(tg) {
         tg->_task_count = 0ULL;
         tg->_last_task_id = EZ_ZEROTID;
@@ -24,7 +24,7 @@ void ezt_taskgroup__init(taskgroup_t *tg, taskint_t maxOutBufCount) {
         );
         if(tg->_outbufs) {
             tg->_max_outbuf_count = maxOutBufCount;
-            for(taskint_t i = 0; i < maxOutBufCount; i++) {
+            for(uint64_t i = 0; i < maxOutBufCount; i++) {
                 tg->_outbufs[i].buffer = (char*) NULL;
                 tg->_outbufs[i].size = 0;
             }
@@ -43,7 +43,7 @@ void ezt_taskgroup__clean(taskgroup_t *tg) {
             }
         }
         if(tg->_outbufs) {
-            for(taskint_t i = 0; i < tg->_max_outbuf_count; i++) {
+            for(uint64_t i = 0; i < tg->_max_outbuf_count; i++) {
                 if(tg->_outbufs[i].buffer){
                     free(tg->_outbufs[i].buffer);
                 }
@@ -67,10 +67,10 @@ void taskgroup__extend(taskgroup_t *otg, taskgroup_t *etg) {
 }
 
 
-void ezt_taskgroup__gather(taskgroup_t* tg, taskint_t taskCount, task_t* taskList[]) {
+void ezt_taskgroup__gather(taskgroup_t* tg, uint64_t taskCount, task_t* taskList[]) {
     if(tg && taskList) {
-        taskbool_t success = true;
-        for(taskint_t i = 0; success && i < taskCount; i++) {
+        bool success = true;
+        for(uint64_t i = 0; success && i < taskCount; i++) {
             success = ezt_task__add_to(taskList[i], tg) != EZ_ZEROTID;
         }
         if(!success) {
@@ -79,15 +79,15 @@ void ezt_taskgroup__gather(taskgroup_t* tg, taskint_t taskCount, task_t* taskLis
     }
 }
 
-taskint_t ezt_taskgroup__await(taskgroup_t *tg, taskint_t maxAwaitCount) {
+uint64_t ezt_taskgroup__await(taskgroup_t *tg, uint64_t maxAwaitCount) {
     // await for at least 'maxAwaitCount' number of tasks if greater than 0;
     // When maxAwaitCount is 0, means await for all tasks.
     if(!tg) {
         return 0;
     }
 
-    taskint_t awaitedCount = 0;
-    taskint_t _maxAwaitCount = maxAwaitCount == 0 
+    uint64_t awaitedCount = 0;
+    uint64_t _maxAwaitCount = maxAwaitCount == 0 
         || maxAwaitCount > tg->_task_count ? tg->_task_count : maxAwaitCount;
 
     while (tg->_task_queue != EZT_QNIL && _maxAwaitCount > 0) {

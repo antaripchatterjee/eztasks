@@ -4,12 +4,11 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-typedef uint64_t                taskint_t;
-typedef long double             taskdec_t;
+
+typedef long double             f64_t;
 typedef double                  tasktime_t;
-typedef bool                    taskbool_t;
 typedef struct _taskbuf_t       taskbuf_t;
-typedef unsigned long long      taskid_t;
+typedef uintmax_t               taskid_t;
 typedef struct _task_t          task_t;
 typedef struct _taskqueue_t     taskqueue_t;
 typedef struct _taskgroup_t     taskgroup_t;
@@ -36,7 +35,8 @@ struct _taskbuf_t {
 
 
 struct _taskstate_t {
-    taskint_t       _iter_count;
+    uint64_t       _iter_count;
+    uint16_t        _state_no;
     void*           _state_ptr;
 };
 
@@ -47,8 +47,8 @@ struct _task_t {
     taskfn_t        _taskFn;
     taskstate_t     _state;
     taskgroup_t*    _children;
-    taskint_t       _startedAt;
-    taskdec_t       _timeoutMs;
+    uint64_t        _startedAt;
+    tasktime_t      _timeoutMs;
     taskcallback_t  _onTimeout;
 };
 
@@ -59,10 +59,10 @@ struct _taskqueue_t {
 
 struct _taskgroup_t {
     taskqueue_t*    _task_queue;
-    taskint_t       _task_count;
+    uint64_t       _task_count;
     taskid_t        _last_task_id;
     taskbuf_t*      _outbufs;
-    taskint_t       _max_outbuf_count;
+    uint64_t       _max_outbuf_count;
 };
 
 #endif // __EZTASKS_TYPES_H__

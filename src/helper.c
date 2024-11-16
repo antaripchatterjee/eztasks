@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-taskbuf_t to_taskbuf(void* _ptr, taskint_t size) {
+taskbuf_t to_taskbuf(void* _ptr, uint64_t size) {
     taskbuf_t taskbuf = zero_taskbuf(size);
     memmove(taskbuf.buffer, _ptr, size);
     return taskbuf;
@@ -15,12 +15,12 @@ taskbuf_t to_taskbuf(void* _ptr, taskint_t size) {
 taskbuf_t empty_taskbuf() {
     taskbuf_t taskbuf = {
         .buffer = (char*) NULL,
-        .size = (taskint_t) 0
+        .size = (uint64_t) 0
     };
     return taskbuf;
 }
 
-taskbuf_t zero_taskbuf(taskint_t size) {
+taskbuf_t zero_taskbuf(uint64_t size) {
     taskbuf_t taskbuf = {
         .buffer = (char*) malloc(sizeof(char) * size),
         .size = size
