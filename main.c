@@ -5,6 +5,9 @@
 #define TASK_COUNT 2
 #define BUFFER_SIZE 2048
 
+#define STATE_READING 0
+#define STATE_WRITE_OUT 1
+
 
 taskstatus_t task_read_file(task_t* task, tasktime_t execTime) {
   FILE* fp = NULL;
@@ -12,7 +15,10 @@ taskstatus_t task_read_file(task_t* task, tasktime_t execTime) {
   ezt_task__read_in(task, &fp);
 
   size_t bytesRead = fread(buffer, sizeof(char), BUFFER_SIZE, fp);
-  if(bytesRead > 0) return TS_INPROGRESS;
+  if(bytesRead > 0) {
+
+    return TS_INPROGRESS;
+  }
   return TS_COMPLETED;
 }
 
@@ -41,14 +47,14 @@ int main(int argc, char const *argv[])
   taskgroup_t tg;
   FILE* fp = fopen("test.txt", "r");
   if(fp == NULL) {
-    perror("Could not open Makefile");
+    perror("fopen");
     return -1;
   }
 
   ezt_taskgroup__init(&tg, TASK_COUNT);
   if(!EZT_TG_INITIATED(&tg)) {
     fclose(fp);
-    perror("Could not initiate task group 'tg'");
+    perror("ezt_taskgroup__init");
     return -1;
   }
 
@@ -60,14 +66,14 @@ int main(int argc, char const *argv[])
   ezt_taskgroup__gather(&tg, TASK_COUNT, tasks);
 
   if(!EZT_TG_INITIATED(&tg)) {
-    perror("Could not gather tasks.");
+    perror("ezt_taskgroup__gather");
     fclose(fp);
     ezt_task__free(t_read);
     ezt_task__free(t_sleep);
     return -1;
   }
   
-  printf("Awaited tasks %lld\n", ezt_taskgroup__await(&tg, 0)); // wait for all
+  ezt_taskgroup__await(&tg, 0); // wait for all
   
   fclose(fp);
   ezt_taskgroup__clean(&tg);

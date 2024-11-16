@@ -2,7 +2,7 @@
 #define __EZTASKS_MACROS_H__
 
 
-#define EZT_TG_INITIATED(TG_PTR)            ((TG_PTR)->_max_outbuf_count)
+#define EZT_TG_INITIATED(TG_PTR)            ((TG_PTR)->_maxOutBufCount)
 
 #define EZT_TASK_COUNT(_TASKS)              (sizeof(_TASKS)/sizeof(task_t*))
 #define EZT_TASK_ID(T)                      ezt_task__id(T)

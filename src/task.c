@@ -34,8 +34,12 @@ task_t* ezt_task__new (void* inBufPtr,  uint64_t inBufSize, uint64_t outBufSize,
         new_task->_taskFn = taskFn;
         new_task->_children = (taskgroup_t *) NULL;
         new_task->_state = (taskstate_t) {
-            ._iter_count = 0UL,
-            ._state_ptr = NULL
+            ._iterCount = 0UL,
+            ._state = 0,
+            ._stateBuf = {
+                ._size = 0UL,
+                ._buffer = NULL
+            }
         };
         new_task->_startedAt = 0UL;
         new_task->_timeoutMs = EZT_NO_TIMEOUT_MS;
@@ -57,9 +61,9 @@ taskid_t ezt_task__add_to(task_t *task, taskgroup_t *tg)
 {
     if (tg && task) {
         if (ezt_task__enqueue(tg, task)) {
-            tg->_task_count++;
+            tg->_taskCount++;
             task->_startedAt = (uint64_t) clock();
-            task->_id = ++(tg->_last_task_id);
+            task->_id = ++(tg->_lastTaskId);
             return task->_id;
         }
         ezt_task__free(task);
@@ -98,15 +102,15 @@ tasktime_t ezt_task__get_exec_time(task_t* task) {
 
 int ezt_task__enqueue(taskgroup_t *tg, task_t *task) {
     if(!tg || !task) return 0;
-    if (tg->_task_queue == EZT_QNIL) {
-        tg->_task_queue = (taskqueue_t *) malloc(sizeof(taskqueue_t));
-        if (tg->_task_queue) {
-            tg->_task_queue->_task = task;
-            tg->_task_queue->_next = EZT_QNIL;
+    if (tg->_taskQueue == EZT_QNIL) {
+        tg->_taskQueue = (taskqueue_t *) malloc(sizeof(taskqueue_t));
+        if (tg->_taskQueue) {
+            tg->_taskQueue->_task = task;
+            tg->_taskQueue->_next = EZT_QNIL;
         }
         return 1;
     } else {
-        taskqueue_t *_last = tg->_task_queue;
+        taskqueue_t *_last = tg->_taskQueue;
         taskqueue_t *_temp;
         do {
             _temp = _last->_next;
@@ -127,10 +131,10 @@ int ezt_task__enqueue(taskgroup_t *tg, task_t *task) {
 
 task_t *ezt_task__dequeue(taskgroup_t *tg) {
     task_t *next_task = (task_t *)NULL;
-    if (tg && tg->_task_queue) {
-        next_task = tg->_task_queue->_task;
-        taskqueue_t *_temp = tg->_task_queue;
-        tg->_task_queue = _temp->_next;
+    if (tg && tg->_taskQueue) {
+        next_task = tg->_taskQueue->_task;
+        taskqueue_t *_temp = tg->_taskQueue;
+        tg->_taskQueue = _temp->_next;
         free(_temp);
     }
     return next_task;

@@ -35,9 +35,12 @@ struct _taskbuf_t {
 
 
 struct _taskstate_t {
-    uint64_t       _iter_count;
-    uint16_t        _state_no;
-    void*           _state_ptr;
+    uint64_t        _iterCount;
+    uint16_t        _state;
+    struct {
+        void* _buffer;
+        uint64_t _size;
+    } _stateBuf;
 };
 
 struct _task_t {
@@ -58,11 +61,11 @@ struct _taskqueue_t {
 };
 
 struct _taskgroup_t {
-    taskqueue_t*    _task_queue;
-    uint64_t       _task_count;
-    taskid_t        _last_task_id;
-    taskbuf_t*      _outbufs;
-    uint64_t       _max_outbuf_count;
+    taskqueue_t*    _taskQueue;
+    uint64_t        _taskCount;
+    taskid_t        _lastTaskId;
+    taskbuf_t*      _outBufs;
+    uint64_t        _maxOutBufCount;
 };
 
 #endif // __EZTASKS_TYPES_H__
