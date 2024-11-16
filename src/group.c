@@ -100,11 +100,13 @@ uint64_t ezt_taskgroup__await(taskgroup_t *tg, uint64_t maxAwaitCount) {
                 status = TS_TIMEDOUT;
             } else {
                 task->_state._iter_count++;
+                uint64_t _startedAt = task->_startedAt;
                 status = task->_taskFn(task, taskExecTime);
+                task->_startedAt = _startedAt;
             }
 
             if (status == TS_INPROGRESS || status == TS_COMPLETED || status == TS_TIMEDOUT) {
-                if(task->_children) {
+                if(task && task->_children) {
                     taskgroup__extend(tg, task->_children);
                     free(task->_children);
                     task->_children = (taskgroup_t*) NULL;

@@ -97,6 +97,7 @@ tasktime_t ezt_task__get_exec_time(task_t* task) {
 
 
 int ezt_task__enqueue(taskgroup_t *tg, task_t *task) {
+    if(!tg || !task) return 0;
     if (tg->_task_queue == EZT_QNIL) {
         tg->_task_queue = (taskqueue_t *) malloc(sizeof(taskqueue_t));
         if (tg->_task_queue) {
