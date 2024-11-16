@@ -2,3 +2,5 @@ build
 objects
 test
 test.exe
+demo.c
+demo.exe

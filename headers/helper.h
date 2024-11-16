@@ -14,8 +14,6 @@ taskbuf_t   zero_taskbuf        (taskint_t size);
 taskbuf_t   empty_taskbuf       (void);
 void        copy_taskbuf        (taskbuf_t* dest, taskbuf_t src);
 
-int         enqueue_task        (taskgroup_t *tg, task_t *task);
-task_t*     dequeue_task        (taskgroup_t *tg);
 
 void*       consume_task_output (taskbuf_t* outbufs, taskid_t tid, void* dest);
 

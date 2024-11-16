@@ -1,7 +1,7 @@
 #include "helper.h"
 #include "task.h"
 #include "group.h"
-
+#include <stdio.h>
 #include <stdlib.h>
 
 taskgroup_t* taskgroup__new(taskint_t maxOutBufCount) {
@@ -37,7 +37,7 @@ void ezt_taskgroup__init(taskgroup_t *tg, taskint_t maxOutBufCount) {
 void ezt_taskgroup__clean(taskgroup_t *tg) {
     if (tg) {
         while (tg->_task_queue) {
-            task_t *task = dequeue_task(tg);
+            task_t *task = ezt_task__dequeue(tg);
             if (task) {
                 ezt_task__free(task);
             }
@@ -57,7 +57,7 @@ void ezt_taskgroup__clean(taskgroup_t *tg) {
 void taskgroup__extend(taskgroup_t *otg, taskgroup_t *etg) {
     if (otg && etg) {
         while (etg->_task_queue) {
-            task_t *task = dequeue_task(etg);
+            task_t *task = ezt_task__dequeue(etg);
             if (task) {
                 etg->_task_count--;
                 ezt_task__add_to(task, otg);
@@ -90,18 +90,19 @@ taskint_t ezt_taskgroup__await(taskgroup_t *tg, taskint_t maxAwaitCount) {
     taskint_t _maxAwaitCount = maxAwaitCount == 0 
         || maxAwaitCount > tg->_task_count ? tg->_task_count : maxAwaitCount;
 
-    while (tg->_task_queue && awaitedCount < _maxAwaitCount) {
-        task_t *task = dequeue_task(tg);
+    while (tg->_task_queue != EZT_QNIL && _maxAwaitCount > 0) {
+        task_t *task = ezt_task__dequeue(tg);
         taskstatus_t status;
         if (task) {
             tg->_task_count--;
-            tasktime_t taskExecTime;
-            if((taskExecTime = ezt_task__is_timeout(task)) > 0) {
+            tasktime_t taskExecTime = ezt_task__get_exec_time(task);
+            if(task->_timeoutMs != EZT_NO_TIMEOUT_MS && taskExecTime >= task->_timeoutMs) {
                 status = TS_TIMEDOUT;
             } else {
                 task->_state._iter_count++;
-                status = task->_taskFn(task);
+                status = task->_taskFn(task, taskExecTime);
             }
+
             if (status == TS_INPROGRESS || status == TS_COMPLETED || status == TS_TIMEDOUT) {
                 if(task->_children) {
                     taskgroup__extend(tg, task->_children);
@@ -110,7 +111,7 @@ taskint_t ezt_taskgroup__await(taskgroup_t *tg, taskint_t maxAwaitCount) {
                 }
             }
             if (status == TS_INPROGRESS) {
-                if (enqueue_task(tg, task)) {
+                if (ezt_task__enqueue(tg, task)) {
                     tg->_task_count++;
                 }
             } else if (status == TS_TIMEDOUT) {

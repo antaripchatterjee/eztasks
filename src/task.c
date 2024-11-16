@@ -56,7 +56,7 @@ taskid_t ezt_task__id(task_t* task) {
 taskid_t ezt_task__add_to(task_t *task, taskgroup_t *tg)
 {
     if (tg && task) {
-        if (enqueue_task(tg, task)) {
+        if (ezt_task__enqueue(tg, task)) {
             tg->_task_count++;
             task->_startedAt = (taskint_t) clock();
             task->_id = ++(tg->_last_task_id);
@@ -69,34 +69,68 @@ taskid_t ezt_task__add_to(task_t *task, taskgroup_t *tg)
 
 void ezt_task__read_in(task_t *task, void *input)
 {
-    if (task->_id && task->_inBuf.buffer && input) {
+    if (task && task->_id && task->_inBuf.buffer && input) {
         memmove(input, task->_inBuf.buffer, task->_inBuf.size);
     }
 }
 
 void ezt_task__write_out(task_t *task, void *output)
 {
-    if (task->_id && task->_outBuf.buffer && output) {
+    if (task && task->_id && task->_outBuf.buffer && output) {
         memmove(task->_outBuf.buffer, output, task->_outBuf.size);
     }
 }
 
-void ezt_task__set_timeout(task_t* task, taskdec_t timeoutMs, tasktimeoufn_t onTimeout) {
+void ezt_task__set_timeout(task_t* task, taskdec_t timeoutMs, taskcallback_t onTimeout) {
     if(task) {
         task->_timeoutMs = timeoutMs;
         task->_onTimeout = onTimeout;
     }
 }
 
-tasktime_t ezt_task__is_timeout(task_t* task) {
-    if(!task) return (tasktime_t) 1;
+tasktime_t ezt_task__get_exec_time(task_t* task) {
+    if(!task) return (tasktime_t) -1;
     tasktime_t taskExecTime = (((tasktime_t)((taskint_t) clock() - 
         task->_startedAt))*1000)/CLOCKS_PER_SEC;
-    if(task->_timeoutMs == EZT_NO_TIMEOUT_MS) {
-        return EZT_NO_TIMEOUT_MS;
+    return taskExecTime;
+}
+
+
+int ezt_task__enqueue(taskgroup_t *tg, task_t *task) {
+    if (tg->_task_queue == EZT_QNIL) {
+        tg->_task_queue = (taskqueue_t *) malloc(sizeof(taskqueue_t));
+        if (tg->_task_queue) {
+            tg->_task_queue->_task = task;
+            tg->_task_queue->_next = EZT_QNIL;
+        }
+        return 1;
+    } else {
+        taskqueue_t *_last = tg->_task_queue;
+        taskqueue_t *_temp;
+        do {
+            _temp = _last->_next;
+            if (_temp)
+            {
+                _last = _temp;
+            }
+        } while (_temp);
+        _last->_next = (taskqueue_t *) malloc(sizeof(taskqueue_t));
+        if (_last->_next) {
+            _last->_next->_task = task;
+            _last->_next->_next = EZT_QNIL;
+        }
+        return 1;
     }
-    if(taskExecTime >= task->_timeoutMs) {
-        return taskExecTime;
+    return 0;
+}
+
+task_t *ezt_task__dequeue(taskgroup_t *tg) {
+    task_t *next_task = (task_t *)NULL;
+    if (tg && tg->_task_queue) {
+        next_task = tg->_task_queue->_task;
+        taskqueue_t *_temp = tg->_task_queue;
+        tg->_task_queue = _temp->_next;
+        free(_temp);
     }
-    return EZT_NO_TIMEOUT_MS;
+    return next_task;
 }

@@ -2,8 +2,7 @@
 #define __EZTASKS_GROUP_H__
 
 #include "types.h"
-
-#define EZT_TG_INITIATED(TG_PTR) ((TG_PTR)->_max_outbuf_count)
+#include "macros.h"
 
 #ifdef __cplusplus
 extern "C"

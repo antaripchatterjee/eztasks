@@ -33,45 +33,6 @@ void copy_taskbuf(taskbuf_t* dest, taskbuf_t src) {
     *dest = to_taskbuf(src.buffer, src.size);
 }
 
-int enqueue_task(taskgroup_t *tg, task_t *task) {
-    if (tg->_task_queue == EZT_QNIL) {
-        tg->_task_queue = (taskqueue_t *) malloc(sizeof(taskqueue_t));
-        if (tg->_task_queue) {
-            tg->_task_queue->_task = task;
-            tg->_task_queue->_next = EZT_QNIL;
-        }
-        return 1;
-    } else {
-        taskqueue_t *_last = tg->_task_queue;
-        taskqueue_t *_temp;
-        do {
-            _temp = _last->_next;
-            if (_temp)
-            {
-                _last = _temp;
-            }
-        } while (_temp);
-        _last->_next = (taskqueue_t *) malloc(sizeof(taskqueue_t));
-        if (_last->_next) {
-            _last->_next->_task = task;
-            _last->_next->_next = EZT_QNIL;
-        }
-        return 1;
-    }
-    return 0;
-}
-
-task_t *dequeue_task(taskgroup_t *tg) {
-    task_t *next_task = (task_t *)NULL;
-    if (tg && tg->_task_queue) {
-        next_task = tg->_task_queue->_task;
-        taskqueue_t *_temp = tg->_task_queue;
-        tg->_task_queue = _temp->_next;
-        free(_temp);
-    }
-    return next_task;
-}
-
 void* consume_task_output(taskbuf_t* outbufs, taskid_t tid, void* dest) {
     if(tid && outbufs) {
         if(dest && outbufs[tid-1].buffer) {

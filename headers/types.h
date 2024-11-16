@@ -17,8 +17,8 @@ typedef struct _taskstate_t     taskstate_t;
 typedef enum _taskstatus_t      taskstatus_t;
 
 
-typedef taskstatus_t (*taskfn_t) (task_t*);
-typedef void (*tasktimeoufn_t) (task_t *, tasktime_t);
+typedef taskstatus_t (*taskfn_t) (task_t*, tasktime_t);
+typedef void (*taskcallback_t) (task_t *, tasktime_t);
 
 
 enum _taskstatus_t {
@@ -49,7 +49,7 @@ struct _task_t {
     taskgroup_t*    _children;
     taskint_t       _startedAt;
     taskdec_t       _timeoutMs;
-    tasktimeoufn_t  _onTimeout;
+    taskcallback_t  _onTimeout;
 };
 
 struct _taskqueue_t {
